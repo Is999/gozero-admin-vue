@@ -2,6 +2,10 @@ import { initPreferences } from '@vben/preferences';
 import { unmountGlobalLoading } from '@vben/utils';
 
 import { overridesPreferences, preferencesExtension } from './preferences';
+import { installResizeObserverLoopErrorGuard } from './utils/resize-observer-error';
+
+// 浏览器会把可延迟到下一帧的 ResizeObserver 通知上报为 error；只过滤两种标准文本，保留其它运行期异常。
+installResizeObserverLoopErrorGuard();
 
 /**
  * 渲染启动失败兜底页；此时多语言和组件系统可能尚未初始化，因此使用双语静态文案。

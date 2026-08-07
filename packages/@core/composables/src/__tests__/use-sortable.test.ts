@@ -4,13 +4,20 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useSortable } from '../use-sortable';
 
+// createSortableMock 在文件级模块 mock 中保持稳定引用，beforeEach 只负责清理调用状态。
+const { createSortableMock } = vi.hoisted(() => ({
+  createSortableMock: vi.fn(),
+}));
+
+vi.mock('sortablejs/modular/sortable.complete.esm.js', () => ({
+  default: {
+    create: createSortableMock,
+  },
+}));
+
 describe('useSortable', () => {
   beforeEach(() => {
-    vi.mock('sortablejs/modular/sortable.complete.esm.js', () => ({
-      default: {
-        create: vi.fn(),
-      },
-    }));
+    createSortableMock.mockReset();
   });
   it('should call Sortable.create with the correct options', async () => {
     // Create a mock element
