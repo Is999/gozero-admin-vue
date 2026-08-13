@@ -42,14 +42,20 @@ export namespace RuntimeConfigApi {
     state: StateItem;
     /** 草稿数量 */
     draft: DraftCount;
-    /** 当前运行态快照 */
+    /** includeSnapshots=true 时返回当前运行态快照，否则为空列表 */
     currentSnapshot: Snapshot;
-    /** 当前全量草稿快照 */
+    /** includeSnapshots=true 时返回当前全量草稿快照，否则为空列表 */
     draftSnapshot: Snapshot;
     /** 草稿快照 SHA256 */
     draftChecksum: string;
     /** 草稿快照是否不同于当前 active 快照 */
     draftChanged: boolean;
+  }
+
+  /** 运行配置概览查询参数 */
+  export interface OverviewQueryReq {
+    /** 是否返回最多各一万条的 active 与草稿全量快照 */
+    includeSnapshots?: boolean;
   }
 
   /** 周期任务查询参数 */
@@ -307,7 +313,7 @@ export namespace RuntimeConfigApi {
     checksum: string;
   }
 
-  /** 发布、回滚和导入回执 */
+  /** 发布和回滚回执 */
   export interface PublishResp {
     /** 新发布 ID */
     releaseId: number;
@@ -334,12 +340,6 @@ export namespace RuntimeConfigApi {
     /** 目标发布 ID */
     releaseId: number;
     /** 回滚备注 */
-    remark?: string;
-  }
-
-  /** 导入当前配置请求 */
-  export interface ImportCurrentReq extends CommonApi.TwoStepReq {
-    /** 导入备注 */
     remark?: string;
   }
 
@@ -386,10 +386,13 @@ export namespace RuntimeConfigApi {
 
 const RUNTIME_CONFIG_PREFIX = '/runtime-config';
 
-// fetchRuntimeConfigOverview 查询运行配置概览。
-export async function fetchRuntimeConfigOverview() {
+// fetchRuntimeConfigOverview 查询运行配置概览，默认不拉取全量快照。
+export async function fetchRuntimeConfigOverview(
+  params: RuntimeConfigApi.OverviewQueryReq = {},
+) {
   return requestClient.get<RuntimeConfigApi.OverviewResp>(
     `${RUNTIME_CONFIG_PREFIX}/overview`,
+    { params },
   );
 }
 
@@ -463,16 +466,6 @@ export async function rollbackRuntimeConfig(
 ) {
   return requestClient.post<RuntimeConfigApi.PublishResp>(
     `${RUNTIME_CONFIG_PREFIX}/rollback`,
-    data,
-  );
-}
-
-// importCurrentRuntimeConfig 导入当前文件运行配置并发布。
-export async function importCurrentRuntimeConfig(
-  data: RuntimeConfigApi.ImportCurrentReq,
-) {
-  return requestClient.post<RuntimeConfigApi.PublishResp>(
-    `${RUNTIME_CONFIG_PREFIX}/import-current`,
     data,
   );
 }

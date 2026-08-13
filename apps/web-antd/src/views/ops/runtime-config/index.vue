@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { RuntimeConfigApi } from '#/api/ops/runtime-config';
 
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 
 import { Page, useVbenDrawer, VbenButton } from '@vben/common-ui';
 import { useAccessStore } from '@vben/stores';
@@ -13,7 +13,6 @@ import {
   EditOutlined,
   EyeOutlined,
   InfoCircleOutlined,
-  ImportOutlined,
   PlusOutlined,
   ReloadOutlined,
   RollbackOutlined,
@@ -30,6 +29,7 @@ import {
   Modal,
   Select,
   Space,
+  Spin,
   Switch,
   Table,
   Tabs,
@@ -46,7 +46,6 @@ import {
   fetchRuntimeConfigRelease,
   fetchRuntimeConfigReleases,
   fetchRuntimePeriodicTasks,
-  importCurrentRuntimeConfig,
   publishRuntimeConfig,
   rollbackRuntimeConfig,
   saveRuntimeArchiveJob,
@@ -77,7 +76,7 @@ type TablePage = {
   current?: number;
   pageSize?: number;
 };
-type RuntimeActionType = 'import' | 'publish' | 'rollback';
+type RuntimeActionType = 'publish' | 'rollback';
 type RuntimeEnabledFilter = 'all' | 'disabled' | 'enabled';
 type RuntimeStatMetric = {
   key: string;
@@ -95,11 +94,22 @@ type RuntimeStatCard = {
 // RUNTIME_CONFIG_MFA_SCENARIO 与后端 MFAScenarioRuntimeConfigManage 保持一致。
 const RUNTIME_CONFIG_MFA_SCENARIO = 12;
 const pageSizeOptions = ['10', '20', '50'];
+// 草稿列表与后端专用五百条单页上限一致，避免选择值与实际返回数量不一致。
+const runtimeDraftPageSizeOptions = ['10', '20', '50', '100', '200', '500'];
 
 const accessStore = useAccessStore();
 const rt = (key: string) => $t(`admin.runtimeConfig.${key}`);
 const overview = ref<null | RuntimeConfigApi.OverviewResp>(null);
-const loadingOverview = ref(false);
+// overviewPendingRequests 记录尚未结束的概览请求，避免并发刷新时过早关闭加载态。
+const overviewPendingRequests = ref(0);
+const loadingOverview = computed(() => overviewPendingRequests.value > 0);
+// snapshotsLoaded 标记当前概览是否已经按需加载 active 与草稿全量快照。
+const snapshotsLoaded = ref(false);
+// snapshotPendingRequests 只统计全量快照请求，普通概览刷新不会让对比面板误报加载完成。
+const snapshotPendingRequests = ref(0);
+const snapshotsLoading = computed(() => snapshotPendingRequests.value > 0);
+// snapshotsLoadPromise 合并同一时刻的全量快照请求，避免切换页签和打开详情重复读取两万条配置。
+let snapshotsLoadPromise: null | Promise<void> = null;
 const submitting = ref(false);
 const activeTab = ref('periodic');
 
@@ -542,14 +552,54 @@ async function refreshAll() {
   ]);
 }
 
-async function loadOverview() {
-  loadingOverview.value = true;
+async function loadOverview(includeSnapshots = snapshotsLoaded.value) {
+  overviewPendingRequests.value += 1;
+  if (includeSnapshots) {
+    snapshotPendingRequests.value += 1;
+  }
   try {
-    overview.value = await fetchRuntimeConfigOverview();
+    const nextOverview = await fetchRuntimeConfigOverview({ includeSnapshots });
+    const loadedOverview = overview.value;
+    // 轻量请求晚于全量请求返回时只刷新状态与数量，不能用空快照覆盖已加载的对比数据。
+    overview.value =
+      !includeSnapshots && snapshotsLoaded.value && loadedOverview
+        ? {
+            ...nextOverview,
+            currentSnapshot: loadedOverview.currentSnapshot,
+            draftChanged: loadedOverview.draftChanged,
+            draftChecksum: loadedOverview.draftChecksum,
+            draftSnapshot: loadedOverview.draftSnapshot,
+          }
+        : nextOverview;
+    if (includeSnapshots) {
+      snapshotsLoaded.value = true;
+    }
   } finally {
-    loadingOverview.value = false;
+    overviewPendingRequests.value -= 1;
+    if (includeSnapshots) {
+      snapshotPendingRequests.value -= 1;
+    }
   }
 }
+
+// ensureOverviewSnapshots 仅在快照对比或运行态详情需要时加载全量列表，普通首屏只读取计数。
+async function ensureOverviewSnapshots() {
+  if (snapshotsLoaded.value) {
+    return;
+  }
+  if (!snapshotsLoadPromise) {
+    snapshotsLoadPromise = loadOverview(true).finally(() => {
+      snapshotsLoadPromise = null;
+    });
+  }
+  await snapshotsLoadPromise;
+}
+
+watch(activeTab, (tab) => {
+  if (tab === 'snapshot') {
+    void ensureOverviewSnapshots();
+  }
+});
 
 async function loadPeriodicTasks() {
   periodicLoading.value = true;
@@ -645,7 +695,8 @@ function openPeriodicDrawer(row?: Record<string, any>) {
 }
 
 // openPeriodicTaskDetailDrawer 打开周期任务最近执行详情。
-function openPeriodicTaskDetailDrawer(row: Record<string, any>) {
+async function openPeriodicTaskDetailDrawer(row: Record<string, any>) {
+  await ensureOverviewSnapshots();
   periodicTaskDetailDrawerApi
     .setData({
       activeTasks: overview.value?.currentSnapshot?.taskPeriodic || [],
@@ -800,7 +851,8 @@ function openArchiveDrawer(row?: Record<string, any>) {
 }
 
 // openArchiveProgressDrawer 打开指定归档任务的运行态详情。
-function openArchiveProgressDrawer(row: Record<string, any>) {
+async function openArchiveProgressDrawer(row: Record<string, any>) {
+  await ensureOverviewSnapshots();
   archiveProgressDrawerApi
     .setData({
       activeTasks: overview.value?.currentSnapshot?.taskPeriodic || [],
@@ -978,12 +1030,6 @@ async function submitRuntimeAction() {
             ...twoStep,
           });
         }
-        if (actionType.value === 'import') {
-          return importCurrentRuntimeConfig({
-            remark: actionRemark.value,
-            ...twoStep,
-          });
-        }
         return rollbackRuntimeConfig({
           releaseId: Number(rollbackRelease.value?.id || 0),
           remark: actionRemark.value,
@@ -1025,9 +1071,6 @@ async function viewRelease(row: Record<string, any>, event: MouseEvent) {
 }
 
 function runtimeActionTitle(type: RuntimeActionType) {
-  if (type === 'import') {
-    return rt('importCurrentConfig');
-  }
   if (type === 'rollback') {
     return rt('rollbackConfig');
   }
@@ -1035,9 +1078,6 @@ function runtimeActionTitle(type: RuntimeActionType) {
 }
 
 function runtimeActionDescription(type: RuntimeActionType) {
-  if (type === 'import') {
-    return rt('importDescription');
-  }
   if (type === 'rollback') {
     return rt('rollbackDescription');
   }
@@ -1045,9 +1085,6 @@ function runtimeActionDescription(type: RuntimeActionType) {
 }
 
 function runtimeActionSuccess(type: RuntimeActionType) {
-  if (type === 'import') {
-    return rt('importSuccess');
-  }
   if (type === 'rollback') {
     return rt('rollbackSuccess');
   }
@@ -1218,7 +1255,7 @@ function runtimeActionSuccess(type: RuntimeActionType) {
                 :pagination="{
                   current: periodicPage,
                   pageSize: periodicPageSize,
-                  pageSizeOptions,
+                  pageSizeOptions: runtimeDraftPageSizeOptions,
                   showSizeChanger: true,
                   total: periodicTotal,
                 }"
@@ -1370,7 +1407,7 @@ function runtimeActionSuccess(type: RuntimeActionType) {
               :pagination="{
                 current: archivePage,
                 pageSize: archivePageSize,
-                pageSizeOptions,
+                pageSizeOptions: runtimeDraftPageSizeOptions,
                 showSizeChanger: true,
                 total: archiveTotal,
               }"
@@ -1502,17 +1539,6 @@ function runtimeActionSuccess(type: RuntimeActionType) {
                     <template #icon><CloudUploadOutlined /></template>
                     {{ rt('publishDraft') }}
                   </VbenButton>
-                  <VbenButton
-                    v-access="
-                      asActionPermission(
-                        OPS_ACTION_PERMISSION_CODES.RUNTIME_CONFIG_IMPORT,
-                      )
-                    "
-                    @click="openRuntimeAction('import')"
-                  >
-                    <template #icon><ImportOutlined /></template>
-                    {{ rt('importCurrent') }}
-                  </VbenButton>
                 </Space>
               </template>
               <div class="runtime-action-result">
@@ -1627,22 +1653,24 @@ function runtimeActionSuccess(type: RuntimeActionType) {
         </Tabs.TabPane>
 
         <Tabs.TabPane key="snapshot" :tab="rt('snapshotTab')">
-          <SnapshotDiffPanel
-            :active-checksum="activeState.activeChecksum"
-            :active-version="activeState.activeVersion || 0"
-            :current-snapshot-text="currentSnapshotText"
-            :draft-changed="Boolean(overview?.draftChanged)"
-            :draft-checksum="overview?.draftChecksum || ''"
-            :draft-snapshot-text="draftSnapshotText"
-            :release-checksum="selectedRelease?.checksum || ''"
-            :release-loading="releaseDetailLoading"
-            :release-selected="Boolean(selectedRelease)"
-            :release-snapshot-json="selectedReleaseSnapshotJson"
-            :release-snapshot-text="selectedReleaseSnapshotText"
-            :release-snapshot-yaml="selectedReleaseSnapshotYaml"
-            :release-version="selectedRelease?.versionNo || 0"
-            :source="overview?.source || '-'"
-          />
+          <Spin :spinning="snapshotsLoading">
+            <SnapshotDiffPanel
+              :active-checksum="activeState.activeChecksum"
+              :active-version="activeState.activeVersion || 0"
+              :current-snapshot-text="currentSnapshotText"
+              :draft-changed="Boolean(overview?.draftChanged)"
+              :draft-checksum="overview?.draftChecksum || ''"
+              :draft-snapshot-text="draftSnapshotText"
+              :release-checksum="selectedRelease?.checksum || ''"
+              :release-loading="releaseDetailLoading"
+              :release-selected="Boolean(selectedRelease)"
+              :release-snapshot-json="selectedReleaseSnapshotJson"
+              :release-snapshot-text="selectedReleaseSnapshotText"
+              :release-snapshot-yaml="selectedReleaseSnapshotYaml"
+              :release-version="selectedRelease?.versionNo || 0"
+              :source="overview?.source || '-'"
+            />
+          </Spin>
         </Tabs.TabPane>
       </Tabs>
 
