@@ -26,7 +26,7 @@ export namespace UserApi {
   // ListParams 表示用户列表查询参数。
   export interface ListParams {
     page?: number; // 当前页码
-    pageSize?: number; // 每页条数
+    pageSize?: number; // 每页条数，后端允许 1-200
     cursorId?: string; // 分表阶段下一页用户 ID 游标，首页不传
     id?: string; // 用户雪花 ID
     shardNo?: number; // 取模分片

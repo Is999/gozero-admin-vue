@@ -7,6 +7,15 @@ import { describe, expect, it } from 'vitest';
 import { findDefaultParentRoleID, useColumns } from './data';
 
 describe('role row access', () => {
+  it('shows the role ID before the role name', () => {
+    const columns = useColumns(() => undefined) as any[];
+
+    expect(columns.slice(0, 2).map((column) => column.field)).toEqual([
+      'id',
+      'title',
+    ]);
+  });
+
   it('uses backend row flags and protects the super role', () => {
     const columns = useColumns(
       () => undefined,

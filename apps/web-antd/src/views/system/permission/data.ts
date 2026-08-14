@@ -397,6 +397,13 @@ export function useColumns<T extends PermissionTreeTitleRow>(
 
   return [
     {
+      align: 'center',
+      field: 'id',
+      fixed: 'left',
+      title: 'ID',
+      width: 90,
+    },
+    {
       field: 'title',
       fixed: 'left',
       minWidth: 240,

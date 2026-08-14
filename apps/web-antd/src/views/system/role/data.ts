@@ -144,17 +144,18 @@ export function useColumns<T = SystemRoleApi.Item>(
 ): VxeTableGridOptions['columns'] {
   return [
     {
+      align: 'center',
+      field: 'id',
+      fixed: 'left',
+      title: $t('business.message.roleId'),
+      width: 90,
+    },
+    {
       field: 'title',
       fixed: 'left',
       minWidth: 240,
       title: $t('business.message.roleName'),
       treeNode: true,
-    },
-    {
-      align: 'center',
-      field: 'id',
-      title: $t('business.message.roleId'),
-      width: 110,
     },
     {
       align: 'center',
