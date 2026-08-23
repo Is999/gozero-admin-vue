@@ -1,8 +1,22 @@
 # 团队采用
 
-## 安装形态
+## 权威源与跨 AI Agent 兼容
 
-仓库 `.agents/skills` 是项目标准的唯一权威源。个人环境可把缺失的标准 skills 安装到 `$CODEX_HOME/skills` 或 `~/.codex/skills`，让 Codex 在仓库外也能发现。
+仓库 `.agents/skills` 是项目 AI 开发标准的唯一权威源，不属于某一个 AI 产品。能够直接识别该目录和 `SKILL.md` 的 AI Agent 必须直接使用仓库版本。
+
+不能直接使用该格式的 AI Agent，必须先把当前任务会触发的 Skill 转换为自身原生支持的 rule、skill、instruction 或等价机制；如果运行环境没有可持久化的原生机制，则在当前任务计划中逐项展开并执行对应规则。任何情况下都不能以“不支持 Skills”为理由跳过项目规范。
+
+转换必须满足：
+
+- 先读取生效的 `AGENTS.md`、目标 `SKILL.md` 及其明确要求的 references/scripts，再生成适配版本。
+- 完整保留 Skill 的触发条件、审批或暂停点、禁止项、执行边界、引用资源、验证命令和完成判定，不能压缩成概括性提示词。
+- 按目标项目的真实技术栈、目录、命令和职责调整表达；不得机械复制来源项目名、路径、依赖、接口或发布方式。
+- 仓库级适配器必须注明权威源路径并纳入版本管理；仅供个人 Agent 使用的派生文件放在其本地规则目录，不得反向覆盖仓库权威源。
+- Skill 更新后必须重新生成或复核派生格式，通过结构检查和语义清单确认没有遗漏确认闸门及禁止项。
+
+## 安装与派生形态
+
+支持 Codex Skill 目录的个人环境可把缺失的标准 Skills 安装到 `$CODEX_HOME/skills` 或 `~/.codex/skills`。其他 AI Agent 应写入各自正式支持的项目级或个人级规则目录；具体目录和文件格式以该 Agent 的当前规范为准，不能在仓库中臆造多套无人消费的配置。
 
 同名 skill 已由仓库提供时，个人目录不得维护另一份可独立修改的版本；双份来源会造成重复触发和规则漂移。确需兼顾仓库外使用时，只允许通过一次性同步流程从仓库生成个人镜像，并在同步后逐目录执行内容一致性校验。规则变更必须先修改仓库权威源，再整体覆盖个人镜像，禁止双向合并或分别修补。
 
@@ -14,6 +28,7 @@
 
 - `standard-development-flow`
 - `requirement-intent-gate`
+- `foundation-baseline-guard`
 - `go-ai-implementation-guard`
 - `simple-code-guard`
 - `implementation-closure-review`

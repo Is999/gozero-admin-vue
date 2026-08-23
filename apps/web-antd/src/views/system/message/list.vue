@@ -44,6 +44,7 @@ import {
 import {
   isProcessableMessageType,
   messageLevelOptions,
+  normalizeSendMessageType,
   resolveMessageTypeLabel,
   useColumns,
   useGridFormSchema,
@@ -847,7 +848,7 @@ function openReplyDrawer(row: AdminMessageApi.Item) {
     level: row.level,
     receiverIDs: [row.senderAdminId],
     title: $t('business.message.replyTitle', [sourceTitle]).slice(0, 200),
-    type: row.type || 'work_handover',
+    type: normalizeSendMessageType(row.type),
   });
   sendDrawerApi.open();
 }
@@ -869,6 +870,26 @@ async function onSendConfirm() {
     if (!messageContentText(content)) {
       message.error($t('business.message.messageContentRequired'));
       return;
+    }
+    if (values.receiverIDs.length > 100) {
+      message.error($t('business.message.messageReceiversTooMany'));
+      return;
+    }
+    if (new TextEncoder().encode(content).length > 32 * 1024) {
+      message.error($t('business.message.messageContentTooLarge'));
+      return;
+    }
+    if (values.data) {
+      if (new TextEncoder().encode(values.data).length > 16 * 1024) {
+        message.error($t('business.message.messageExtraDataTooLarge'));
+        return;
+      }
+      try {
+        JSON.parse(values.data);
+      } catch {
+        message.error($t('business.message.messageExtraDataInvalid'));
+        return;
+      }
     }
     await sendAdminMessage({
       ...values,

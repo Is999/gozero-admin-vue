@@ -57,12 +57,34 @@ const MESSAGE_TYPE_META = [
   },
 ];
 
+// SEND_MESSAGE_TYPE_VALUES 限制公网表单只能创建个人消息，系统事件类型仅用于列表展示和筛选。
+const SEND_MESSAGE_TYPE_VALUES = new Set<string>([
+  'leave_message',
+  'work_handover',
+]);
+
 // messageTypeOptions 返回消息类型选项，避免语言切换后沿用模块初始化时的旧文案。
 export function messageTypeOptions() {
   return MESSAGE_TYPE_META.map((item) => ({
     label: $t(item.labelKey),
     value: item.value,
   }));
+}
+
+// sendMessageTypeOptions 返回公网发送表单允许使用的个人消息类型。
+export function sendMessageTypeOptions() {
+  return messageTypeOptions().filter((item) =>
+    SEND_MESSAGE_TYPE_VALUES.has(item.value),
+  );
+}
+
+// normalizeSendMessageType 保留个人消息类型，回复系统事件时回退为工作交接。
+export function normalizeSendMessageType(
+  value: string,
+): AdminMessageApi.SendType {
+  return SEND_MESSAGE_TYPE_VALUES.has(value)
+    ? (value as AdminMessageApi.SendType)
+    : 'work_handover';
 }
 
 export const PROCESSABLE_MESSAGE_TYPES = new Set([
@@ -130,6 +152,7 @@ export function useSendFormSchema(): VbenFormSchema[] {
       fieldName: 'receiverIDs',
       help: $t('business.message.messageReceiversHelp'),
       label: $t('business.message.messageReceivers'),
+      rules: 'selectRequired',
       formItemClass: 'col-span-2',
       componentProps: {
         api: fetchAdminReceiverOptions,
@@ -148,7 +171,7 @@ export function useSendFormSchema(): VbenFormSchema[] {
       rules: 'selectRequired',
       formItemClass: 'col-span-1',
       componentProps: {
-        options: messageTypeOptions(),
+        options: sendMessageTypeOptions(),
         placeholder: $t('business.message.selectMessageType'),
         style: { width: '100%' },
       },
@@ -200,7 +223,9 @@ export function useSendFormSchema(): VbenFormSchema[] {
       formItemClass: 'col-span-2',
       componentProps: {
         allowClear: true,
+        maxLength: 500,
         placeholder: $t('business.message.messageLinkPlaceholder'),
+        showCount: true,
       },
     },
     {
@@ -210,8 +235,10 @@ export function useSendFormSchema(): VbenFormSchema[] {
       formItemClass: 'col-span-2',
       componentProps: {
         class: 'font-mono text-xs',
+        maxLength: 16 * 1024,
         placeholder: $t('business.message.messageExtraDataPlaceholder'),
         rows: 4,
+        showCount: true,
       },
     },
   ];

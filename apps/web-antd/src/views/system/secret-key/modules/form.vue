@@ -169,6 +169,15 @@ async function getCurrentValues() {
   return await formApi.getValues<SystemSecretKeyApi.SaveParams>();
 }
 
+// validateSecuritySwitches 提前反馈后端安全契约，最终权威校验仍由服务端执行。
+function validateSecuritySwitches(values: SystemSecretKeyApi.SaveParams) {
+  if (values.cryptoStatus === 1 && values.signStatus !== 1) {
+    message.error($t('business.message.secretCryptoRequiresSigning'));
+    return false;
+  }
+  return true;
+}
+
 async function onGenerateSecretUUID() {
   await formApi.setFieldValue('uuid', buildSecretUUID(), false);
   message.success($t('business.message.secretIdentifierGenerated'));
@@ -207,6 +216,9 @@ async function runValidation(mode: 'self-check' | 'validate') {
     return null;
   }
   const values = await formApi.getValues<SystemSecretKeyApi.SaveParams>();
+  if (!validateSecuritySwitches(values)) {
+    return null;
+  }
   validateBusy.value = true;
   try {
     const result = await submitWithMfaRetry(
@@ -296,6 +308,9 @@ async function onSubmit() {
     return;
   }
   const values = await formApi.getValues<SystemSecretKeyApi.SaveParams>();
+  if (!validateSecuritySwitches(values)) {
+    return;
+  }
   const isEdit = Boolean(formData.value?.id);
   drawerApi.lock();
   try {

@@ -34,6 +34,10 @@ export namespace SystemAdminLogApi {
     userID?: number; // 用户 ID筛选
     username?: string; // 用户名筛选
     action?: string; // 操作动作筛选
+    startTime?: string; // 查询开始时间，格式 YYYY-MM-DD HH:mm:ss
+    endTime?: string; // 查询结束时间，单次跨度不超过 31 天
+    orderBy?: 'createdAt' | 'id'; // 仅允许按创建时间或主键排序
+    order?: 'asc' | 'desc'; // 排序方向
   }
 }
 

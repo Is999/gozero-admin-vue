@@ -1,0 +1,4 @@
+interface:
+  display_name: "管理端骨架保护"
+  short_description: "保护 vben 工程、共享组件、路由权限和安全请求链。"
+  default_prompt: "使用 $foundation-baseline-guard 区分管理端页面业务与基础工程核心变更，并执行影响审计。"

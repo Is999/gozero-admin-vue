@@ -1,5 +1,12 @@
 # AGENTS.md
 
+本文件是所有 AI Agent 参与本仓库开发的入口。不能直接识别仓库 `.agents/skills` 的 AI Agent，必须先把当前任务需要的 Skill 转换为自身支持的 rule、skill 或 instruction 格式；转换不得省略触发条件、确认闸门、禁止项、引用资源和验证命令。转换规则见 `.agents/skills/standard-development-flow/references/team-adoption.md`。
+
+## 基础骨架保护
+
+- 本仓库承担 vben 管理端基础工程。页面开发、框架演进、重构或跨仓同步可能触及 workspace、共享 package、应用启动、路由守卫、认证会话、安全请求链、统一组件或构建底座时，必须先使用 `$foundation-baseline-guard` 区分页面业务、业务接入和核心变更。
+- 核心变更必须说明工程缺陷证据、应用业务层不可解决原因、受影响应用和下游项目、替代方案、验证及回退方式，并取得开发人员明确确认。
+
 ## 必须遵守
 
 1. 改代码前先读相关页面、组件、接口封装和现有调用链；涉及后端契约时同步参考 `../admin-go/docs/site/角色文档/后端开发/AI开发提示词.md` 和 `../admin-go/docs/site/角色文档/后端开发/AI开发规范.md`。

@@ -14,6 +14,9 @@ export namespace AdminMessageApi {
   // ReadStatus 表示已读状态筛选：0未读 1已读。
   export type ReadStatus = 0 | 1;
 
+  // SendType 表示公网发送入口允许创建的个人消息类型。
+  export type SendType = 'leave_message' | 'work_handover';
+
   // Item 表示管理员收件箱消息项。
   export interface Item {
     id: number; // 消息ID
@@ -80,13 +83,13 @@ export namespace AdminMessageApi {
   // SendReq 表示发送消息请求参数。
   export interface SendReq {
     replyToId?: number; // 被回复的原消息ID
-    type: string; // 消息类型
+    type: SendType; // 个人消息类型；系统通知只能由服务端创建
     level: Level; // 消息等级
     title: string; // 消息标题
-    content: string; // 消息内容，支持受控富文本HTML
-    data?: string; // 扩展数据JSON
-    link?: string; // 跳转链接
-    receiverIDs?: number[]; // 收件人管理员ID列表；为空表示广播
+    content: string; // 消息内容，支持受控富文本HTML，最多32 KiB
+    data?: string; // 扩展数据JSON，最多16 KiB
+    link?: string; // 跳转链接，最多500个字符
+    receiverIDs: number[]; // 收件人管理员ID列表，必填且最多100人
   }
 
   // SendResp 表示发送消息结果。
