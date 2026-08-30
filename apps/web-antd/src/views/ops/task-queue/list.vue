@@ -651,6 +651,12 @@ onBeforeUnmount(() => {
             }}
           </Button>
         </div>
+        <JsonDetailViewer
+          v-if="showWorkerSnapshot && workerSummaryText"
+          class="mt-4"
+          :search-placeholder="$t('business.message.jsonDataSearchPlaceholder')"
+          :value="workerSummaryText"
+        />
         <Table
           class="worker-table mt-4"
           :columns="workerColumns"
@@ -689,12 +695,6 @@ onBeforeUnmount(() => {
             </template>
           </template>
         </Table>
-        <JsonDetailViewer
-          v-if="showWorkerSnapshot && workerSummaryText"
-          class="mt-4"
-          :search-placeholder="$t('business.message.jsonDataSearchPlaceholder')"
-          :value="workerSummaryText"
-        />
       </Card>
     </div>
   </Page>

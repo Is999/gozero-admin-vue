@@ -62,6 +62,8 @@ const userStore = useUserStore();
 // ================= 发送消息表单 =================
 // sending 表示当前是否正在提交发送请求。
 const sending = ref(false);
+// presetReceiverOptions 保存回复抽屉预置收件人标签，避免远程选项尚未加载时只显示管理员 ID。
+const presetReceiverOptions = ref<AdminMessageApi.ReceiverOptionItem[]>([]);
 // sendDrawerTitle 区分新消息与回复消息抽屉标题。
 const sendDrawerTitle = ref('');
 // replyToMessageID 保存本次发送关联的原消息ID，0表示普通消息。
@@ -100,7 +102,7 @@ const [SendForm, sendFormApi] = useVbenForm({
     labelClass: 'w-24',
   },
   layout: 'horizontal',
-  schema: useSendFormSchema(),
+  schema: useSendFormSchema(presetReceiverOptions),
   showDefaultActions: false,
   wrapperClass: 'grid grid-cols-2 gap-x-6 gap-y-3',
 });
@@ -816,6 +818,7 @@ function onDeleteMessage(row: AdminMessageApi.Item) {
 // openSendDrawer 打开发送消息抽屉。
 function openSendDrawer() {
   replyToMessageID.value = 0;
+  presetReceiverOptions.value = [];
   sendDrawerTitle.value = $t('business.message.sendMessage');
   sendFormApi.resetForm();
   sendFormApi.setValues({
@@ -842,6 +845,13 @@ function openReplyDrawer(row: AdminMessageApi.Item) {
   const sourceTitle =
     row.title || $t('business.message.messageTitleWithId', [row.id]);
   replyToMessageID.value = row.id;
+  presetReceiverOptions.value = [
+    {
+      id: row.senderAdminId,
+      realName: '',
+      username: row.senderAdminName,
+    },
+  ];
   sendDrawerTitle.value = $t('business.message.replyMessage');
   sendFormApi.resetForm();
   sendFormApi.setValues({
@@ -1121,7 +1131,6 @@ function onClearRead() {
   place-content: flex-start;
   align-items: flex-start;
   min-width: 0;
-  block-size: max-content;
   min-height: 0;
   padding: 10px 12px;
   background: hsl(var(--accent) / 38%);
@@ -1600,11 +1609,6 @@ function onClearRead() {
 }
 
 @media (max-width: 1024px) {
-  .send-message-guide {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .send-message-guide__meta {
     justify-content: flex-start;
   }

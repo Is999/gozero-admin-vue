@@ -137,7 +137,7 @@ export namespace AdminMessageApi {
   export interface ReceiverOptionParams {
     page?: number; // 页码
     pageSize?: number; // 每页条数
-    keyword?: string; // 账号或姓名关键字
+    keyword?: string; // 管理员 ID 精确值，或账号、姓名前缀，最多 50 个字符
   }
 
   // ReceiverOptionItem 表示当前管理员可选择的消息收件人。

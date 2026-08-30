@@ -1834,63 +1834,9 @@ watch(
           class="border border-slate-200/70 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/70"
           :title="activeConfigItemsTitle"
         >
-          <div
-            class="config-query-panel flex flex-col gap-4 border border-slate-200 bg-slate-50/70 p-5 dark:border-slate-700 dark:bg-slate-950/30"
-          >
-            <div class="config-query-toolbar grid gap-4">
-              <Input
-                v-model:value="activeConfigItemKeyword"
-                id="config-reload-item-search"
-                name="config-reload-item-search"
-                allow-clear
-                autocomplete="off"
-                class="config-query-input w-full"
-                :maxlength="128"
-                :placeholder="
-                  $t('business.message.configItemSearchPlaceholder')
-                "
-                size="large"
-                @press-enter="() => handleFetchActiveConfigItems(true)"
-              />
-              <div
-                class="config-query-actions flex min-w-0 shrink-0 flex-col gap-3 sm:flex-row sm:items-center"
-              >
-                <Switch
-                  v-model:checked="activeConfigItemSensitiveOnly"
-                  class="config-query-switch"
-                  :checked-children="$t('business.message.sensitiveOnly')"
-                  :disabled="activeConfigItemsLoading"
-                  :un-checked-children="$t('business.message.all')"
-                  @change="() => handleFetchActiveConfigItems(true, false)"
-                />
-                <Button
-                  class="config-query-button"
-                  :disabled="activeConfigItemsLoading"
-                  :loading="activeConfigItemsLoading"
-                  size="large"
-                  type="primary"
-                  @click="handleFetchActiveConfigItems(true)"
-                >
-                  <template #icon>
-                    <SearchOutlined />
-                  </template>
-                  {{ $t('business.message.searchConfigItems') }}
-                </Button>
-              </div>
-            </div>
-
-            <Alert
-              v-if="!activeConfigItemsLoaded"
-              class="config-query-alert"
-              :message="activeConfigItemsGuide"
-              show-icon
-              type="info"
-            />
-          </div>
-
           <template v-if="activeConfigItemsLoaded">
             <div
-              class="mt-5 overflow-hidden border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950/30"
+              class="overflow-hidden border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950/30"
             >
               <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
                 <div
@@ -1967,7 +1913,64 @@ watch(
                 </Tag>
               </div>
             </div>
+          </template>
 
+          <div
+            class="config-query-panel flex flex-col gap-4 border border-slate-200 bg-slate-50/70 p-5 dark:border-slate-700 dark:bg-slate-950/30"
+            :class="{ 'mt-5': activeConfigItemsLoaded }"
+          >
+            <div class="config-query-toolbar grid gap-4">
+              <Input
+                v-model:value="activeConfigItemKeyword"
+                id="config-reload-item-search"
+                name="config-reload-item-search"
+                allow-clear
+                autocomplete="off"
+                class="config-query-input w-full"
+                :maxlength="128"
+                :placeholder="
+                  $t('business.message.configItemSearchPlaceholder')
+                "
+                size="large"
+                @press-enter="() => handleFetchActiveConfigItems(true)"
+              />
+              <div
+                class="config-query-actions flex min-w-0 shrink-0 flex-col gap-3 sm:flex-row sm:items-center"
+              >
+                <Switch
+                  v-model:checked="activeConfigItemSensitiveOnly"
+                  class="config-query-switch"
+                  :checked-children="$t('business.message.sensitiveOnly')"
+                  :disabled="activeConfigItemsLoading"
+                  :un-checked-children="$t('business.message.all')"
+                  @change="() => handleFetchActiveConfigItems(true, false)"
+                />
+                <Button
+                  class="config-query-button"
+                  :disabled="activeConfigItemsLoading"
+                  :loading="activeConfigItemsLoading"
+                  size="large"
+                  type="primary"
+                  @click="handleFetchActiveConfigItems(true)"
+                >
+                  <template #icon>
+                    <SearchOutlined />
+                  </template>
+                  {{ $t('business.message.searchConfigItems') }}
+                </Button>
+              </div>
+            </div>
+
+            <Alert
+              v-if="!activeConfigItemsLoaded"
+              class="config-query-alert"
+              :message="activeConfigItemsGuide"
+              show-icon
+              type="info"
+            />
+          </div>
+
+          <template v-if="activeConfigItemsLoaded">
             <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
               <div class="flex min-w-0 flex-wrap items-center gap-2">
                 <Radio.Group

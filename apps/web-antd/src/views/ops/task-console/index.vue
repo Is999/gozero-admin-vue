@@ -1212,6 +1212,14 @@ onMounted(() => {
               {{ $t('business.message.viewRecentEnqueuedTask') }}
             </Button>
           </Space>
+          <JsonDetailViewer
+            v-if="showSchedulerRaw && schedulerStatusText"
+            class="mt-4"
+            :search-placeholder="
+              $t('business.message.jsonDataSearchPlaceholder')
+            "
+            :value="schedulerStatusText"
+          />
           <div
             v-if="schedulerSummaryRows.length > 0"
             class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3"
@@ -1250,14 +1258,6 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          <JsonDetailViewer
-            v-if="showSchedulerRaw && schedulerStatusText"
-            class="mt-4"
-            :search-placeholder="
-              $t('business.message.jsonDataSearchPlaceholder')
-            "
-            :value="schedulerStatusText"
-          />
         </Card>
 
         <Card

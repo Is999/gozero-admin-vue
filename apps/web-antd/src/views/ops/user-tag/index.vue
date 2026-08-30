@@ -988,6 +988,110 @@ onMounted(() => {
               </div>
             </div>
           </div>
+          <Card
+            v-if="showUserTagReference"
+            class="mb-4 border border-slate-200/70 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/70"
+            :title="$t('business.message.runModeProductionAdvice')"
+          >
+            <div class="grid gap-4 xl:grid-cols-[1.1fr_1fr]">
+              <div class="grid gap-3 md:grid-cols-2">
+                <div
+                  v-for="(meta, key) in USER_TAG_MODE_META"
+                  :key="key"
+                  class="rounded-xl border border-slate-200/70 bg-slate-50/80 px-3 py-3 dark:border-slate-700 dark:bg-slate-950/40"
+                >
+                  <div
+                    class="text-sm font-semibold text-slate-900 dark:text-slate-100"
+                  >
+                    {{ key }}
+                  </div>
+                  <div
+                    class="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300"
+                  >
+                    {{ meta.description }}
+                  </div>
+                  <div class="mt-2 text-xs leading-5 text-slate-500">
+                    {{ meta.hint }}
+                  </div>
+                </div>
+              </div>
+              <div
+                class="space-y-3 text-sm leading-6 text-slate-600 dark:text-slate-300"
+              >
+                <div
+                  class="rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-3 py-3"
+                >
+                  {{ $t('business.message.userTagProductionAdviceScale') }}
+                </div>
+                <div
+                  class="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-3"
+                >
+                  {{ $t('business.message.userTagProductionAdviceTargeted') }}
+                </div>
+                <div
+                  class="rounded-xl border border-amber-500/20 bg-amber-500/5 px-3 py-3"
+                >
+                  {{ $t('business.message.userTagProductionAdviceUnique') }}
+                </div>
+
+                <div
+                  class="rounded-xl border border-slate-200/70 bg-slate-50/80 px-3 py-3 dark:border-slate-700 dark:bg-slate-950/40"
+                >
+                  <div
+                    class="text-sm font-semibold text-slate-900 dark:text-slate-100"
+                  >
+                    {{ $t('business.message.workflowFieldGuide') }}
+                  </div>
+                  <ul
+                    class="mt-2 list-disc space-y-1 pl-5 text-xs leading-5 text-slate-600 dark:text-slate-300"
+                  >
+                    <li
+                      v-for="item in userTagWorkflowFieldGuides"
+                      :key="item.label"
+                    >
+                      <span
+                        class="font-medium text-slate-700 dark:text-slate-200"
+                      >
+                        {{ item.label }}:
+                      </span>
+                      <span>{{ item.description }}</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div
+                  class="rounded-xl border border-slate-200/70 bg-slate-50/80 px-3 py-3 dark:border-slate-700 dark:bg-slate-950/40"
+                >
+                  <div
+                    class="text-sm font-semibold text-slate-900 dark:text-slate-100"
+                  >
+                    {{ $t('business.message.recalculateFieldGuide') }}
+                  </div>
+                  <ul
+                    class="mt-2 list-disc space-y-1 pl-5 text-xs leading-5 text-slate-600 dark:text-slate-300"
+                  >
+                    <li
+                      v-for="item in userTagRecalculateFieldGuides"
+                      :key="item.label"
+                    >
+                      <span
+                        class="font-medium text-slate-700 dark:text-slate-200"
+                      >
+                        {{ item.label }}:
+                      </span>
+                      <span>{{ item.description }}</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <pre
+                  v-if="queueHintText"
+                  class="overflow-auto rounded-xl border border-slate-200/70 bg-slate-950/90 px-3 py-2 text-[11px] leading-5 text-slate-100 dark:border-slate-700/60"
+                  v-text="queueHintText"
+                ></pre>
+              </div>
+            </div>
+          </Card>
           <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
             <Space :size="8" wrap>
               <Button size="small" @click="fillWorkflowModeDefaults">
@@ -1280,107 +1384,6 @@ onMounted(() => {
           />
         </Card>
       </div>
-
-      <Card
-        v-if="showUserTagReference"
-        class="border border-slate-200/70 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/70"
-        :title="$t('business.message.runModeProductionAdvice')"
-      >
-        <div class="grid gap-4 xl:grid-cols-[1.1fr_1fr]">
-          <div class="grid gap-3 md:grid-cols-2">
-            <div
-              v-for="(meta, key) in USER_TAG_MODE_META"
-              :key="key"
-              class="rounded-xl border border-slate-200/70 bg-slate-50/80 px-3 py-3 dark:border-slate-700 dark:bg-slate-950/40"
-            >
-              <div
-                class="text-sm font-semibold text-slate-900 dark:text-slate-100"
-              >
-                {{ key }}
-              </div>
-              <div
-                class="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300"
-              >
-                {{ meta.description }}
-              </div>
-              <div class="mt-2 text-xs leading-5 text-slate-500">
-                {{ meta.hint }}
-              </div>
-            </div>
-          </div>
-          <div
-            class="space-y-3 text-sm leading-6 text-slate-600 dark:text-slate-300"
-          >
-            <div
-              class="rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-3 py-3"
-            >
-              {{ $t('business.message.userTagProductionAdviceScale') }}
-            </div>
-            <div
-              class="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-3"
-            >
-              {{ $t('business.message.userTagProductionAdviceTargeted') }}
-            </div>
-            <div
-              class="rounded-xl border border-amber-500/20 bg-amber-500/5 px-3 py-3"
-            >
-              {{ $t('business.message.userTagProductionAdviceUnique') }}
-            </div>
-
-            <div
-              class="rounded-xl border border-slate-200/70 bg-slate-50/80 px-3 py-3 dark:border-slate-700 dark:bg-slate-950/40"
-            >
-              <div
-                class="text-sm font-semibold text-slate-900 dark:text-slate-100"
-              >
-                {{ $t('business.message.workflowFieldGuide') }}
-              </div>
-              <ul
-                class="mt-2 list-disc space-y-1 pl-5 text-xs leading-5 text-slate-600 dark:text-slate-300"
-              >
-                <li
-                  v-for="item in userTagWorkflowFieldGuides"
-                  :key="item.label"
-                >
-                  <span class="font-medium text-slate-700 dark:text-slate-200">
-                    {{ item.label }}:
-                  </span>
-                  <span>{{ item.description }}</span>
-                </li>
-              </ul>
-            </div>
-
-            <div
-              class="rounded-xl border border-slate-200/70 bg-slate-50/80 px-3 py-3 dark:border-slate-700 dark:bg-slate-950/40"
-            >
-              <div
-                class="text-sm font-semibold text-slate-900 dark:text-slate-100"
-              >
-                {{ $t('business.message.recalculateFieldGuide') }}
-              </div>
-              <ul
-                class="mt-2 list-disc space-y-1 pl-5 text-xs leading-5 text-slate-600 dark:text-slate-300"
-              >
-                <li
-                  v-for="item in userTagRecalculateFieldGuides"
-                  :key="item.label"
-                >
-                  <span class="font-medium text-slate-700 dark:text-slate-200">
-                    {{ item.label }}:
-                  </span>
-                  <span>{{ item.description }}</span>
-                </li>
-              </ul>
-            </div>
-
-            <pre
-              v-if="queueHintText"
-              class="overflow-auto rounded-xl border border-slate-200/70 bg-slate-950/90 px-3 py-2 text-[11px] leading-5 text-slate-100 dark:border-slate-700/60"
-              v-text="queueHintText"
-            ></pre>
-          </div>
-        </div>
-      </Card>
     </div>
   </Page>
 </template>

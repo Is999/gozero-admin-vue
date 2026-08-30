@@ -45,7 +45,7 @@ export namespace FileTransferApi {
     objectKey?: string;
     storagePath: string;
     uploadMode?: 'direct' | 'server';
-    status: 'completed' | 'pending' | 'uploading';
+    status: 'completed' | 'finalizing' | 'pending' | 'uploading';
     createdAt: string;
     updatedAt: string;
     expiresAt: string;

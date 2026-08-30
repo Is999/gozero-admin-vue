@@ -1,3 +1,5 @@
+import type { Ref } from 'vue';
+
 import type { VbenFormSchema } from '#/adapter/form';
 import type { OnActionClickFn, VxeTableGridOptions } from '#/adapter/vxe-table';
 import type { AdminMessageApi } from '#/api/message';
@@ -8,9 +10,7 @@ import { VbenTiptapPreview } from '@vben/plugins/tiptap';
 
 import { Popover } from 'ant-design-vue';
 
-import { fetchAdminMessageReceiverOptions } from '#/api/message';
 import { $t } from '#/locales';
-import { fetchBoundedPages } from '#/utils/request/bounded-pagination';
 
 import {
   countTagMeta,
@@ -19,6 +19,7 @@ import {
 } from '../table-tags';
 import { messageContentText, sanitizeMessageContentHtml } from './content';
 import MessageContentEditor from './message-content-editor.vue';
+import MessageReceiverSelect from './message-receiver-select.vue';
 
 // MESSAGE_TYPE_META 定义常用消息类型稳定枚举，文案在使用时从语言包读取。
 const MESSAGE_TYPE_META = [
@@ -127,41 +128,22 @@ function readStatusOptions() {
   ];
 }
 
-// fetchAdminReceiverOptions 拉取当前账号可用的消息收件人，避免依赖管理员列表权限。
-export async function fetchAdminReceiverOptions() {
-  const items = await fetchBoundedPages<AdminMessageApi.ReceiverOptionItem>({
-    fetchPage: (page, pageSize) =>
-      fetchAdminMessageReceiverOptions({ page, pageSize }),
-    getItemKey: (item) => item.id,
-    maxItems: 500,
-    maxPages: 5,
-  });
-  return items.map((item) => ({
-    label: item.realName
-      ? `${item.realName}（${item.username}）`
-      : item.username,
-    value: item.id,
-  }));
-}
-
 // useSendFormSchema 返回“发送消息”表单 schema。
-export function useSendFormSchema(): VbenFormSchema[] {
+export function useSendFormSchema(
+  presetReceiverOptions: Ref<AdminMessageApi.ReceiverOptionItem[]>,
+): VbenFormSchema[] {
   return [
     {
-      component: 'ApiSelect',
+      component: markRaw(MessageReceiverSelect),
       fieldName: 'receiverIDs',
       help: $t('business.message.messageReceiversHelp'),
       label: $t('business.message.messageReceivers'),
       rules: 'selectRequired',
       formItemClass: 'col-span-2',
-      componentProps: {
-        api: fetchAdminReceiverOptions,
-        allowClear: true,
-        maxTagCount: 3,
-        mode: 'multiple',
-        showSearch: true,
-        style: { width: '100%' },
-      },
+      componentProps: () => ({
+        placeholder: $t('business.message.messageReceiversHelp'),
+        presetOptions: presetReceiverOptions.value,
+      }),
     },
     {
       component: 'Select',
@@ -234,7 +216,7 @@ export function useSendFormSchema(): VbenFormSchema[] {
       label: $t('business.message.messageExtraData'),
       formItemClass: 'col-span-2',
       componentProps: {
-        class: 'font-mono text-xs',
+        class: 'w-full font-mono text-xs',
         maxLength: 16 * 1024,
         placeholder: $t('business.message.messageExtraDataPlaceholder'),
         rows: 4,

@@ -36,6 +36,13 @@ export async function createResumableUpload(options: ResumableUploadOptions) {
     return session;
   }
 
+  if (session.status === 'finalizing') {
+    // 分片已经由服务端合并，只重试最终对象提交，避免重新切片或覆盖已校验的本地文件。
+    session = await completeFileUpload({ uploadId: session.uploadId });
+    await options.onProgress?.(session);
+    return session;
+  }
+
   if (session.uploadMode === 'direct' && session.directUpload?.url) {
     await uploadDirectFile(session.directUpload, file);
     session = await completeFileUpload({ uploadId: session.uploadId });
