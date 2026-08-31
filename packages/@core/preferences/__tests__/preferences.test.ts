@@ -64,7 +64,8 @@ describe('preferences', () => {
   it('does not create an unprefixed localStorage manager before initialization', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     try {
-      new PreferenceManager();
+      const uninitializedManager = new PreferenceManager();
+      expect(uninitializedManager).toBeInstanceOf(PreferenceManager);
       expect(warn).not.toHaveBeenCalledWith(
         expect.stringContaining('[StorageManager] empty prefix'),
       );

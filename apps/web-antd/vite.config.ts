@@ -130,6 +130,8 @@ const appConfig: DefineApplicationOptions = async (config) => {
       },
       plugins: [createAdminLicensePlugin()],
       server: {
+        // 本机管理后台可代理回环 API，禁止默认发布到局域网后形成未授权转发入口。
+        host: '127.0.0.1',
         proxy: {
           '/api': {
             changeOrigin: true,

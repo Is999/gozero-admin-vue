@@ -637,6 +637,7 @@ setupVbenVxeTable({
                 const button = h(
                   Button,
                   {
+                    'aria-label': iconOnly ? text : undefined,
                     danger,
                     class: buttonClass,
                     size: 'small',

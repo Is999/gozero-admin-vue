@@ -285,16 +285,37 @@ function appAuthenticateResponseInterceptor({
   };
 }
 
-// attachRequestErrorContext 在核心客户端拆出业务错误前保留响应、请求和 trace 上下文。
+// safeErrorRequestConfig 仅保留排障所需的请求定位信息，禁止认证头和表单正文进入异常日志。
+function safeErrorRequestConfig(config?: Record<string, any>) {
+  if (!config) {
+    return undefined;
+  }
+  return {
+    method: config.method,
+    url: config.url,
+  };
+}
+
+// attachRequestErrorContext 在核心客户端拆出业务错误前保留状态码和 trace 上下文。
+// 原始 Axios config 同时包含 Authorization、密码或 MFA 数据，异常离开请求层前必须裁剪。
 function attachRequestErrorContext(error: any) {
   const response = error?.response;
+  const requestConfig = error?.config || response?.config;
+  const safeConfig = safeErrorRequestConfig(requestConfig);
+  if (error && typeof error === 'object') {
+    error.config = safeConfig;
+  }
   if (!response) {
     throw error;
   }
   const responseData = response.data;
-  const responseSnapshot = { ...response, data: responseData };
+  const responseSnapshot = {
+    ...response,
+    config: safeConfig,
+    data: responseData,
+  };
   const context = {
-    config: error.config || response.config,
+    config: safeConfig,
     httpStatus: response.status,
     httpStatusText: response.statusText,
     response: responseSnapshot,
@@ -304,7 +325,7 @@ function attachRequestErrorContext(error: any) {
       responseData?.trace_id ||
       extractResponseTraceId(error),
   };
-  response.data =
+  const contextualData =
     responseData && typeof responseData === 'object'
       ? Object.assign({}, responseData, context)
       : Object.assign(
@@ -313,6 +334,8 @@ function attachRequestErrorContext(error: any) {
           ),
           { ...context, data: responseData },
         );
+  response.data = contextualData;
+  error.response = { ...responseSnapshot, data: contextualData };
   throw error;
 }
 

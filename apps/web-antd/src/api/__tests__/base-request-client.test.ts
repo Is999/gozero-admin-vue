@@ -243,6 +243,42 @@ describe('request clients', () => {
     });
   });
 
+  it('removes credentials and request bodies from returned error context', async () => {
+    const client = createBaseRequestClient('', { responseReturn: 'data' });
+    const password = 'local-password-must-not-leak';
+
+    const error = await client
+      .post(
+        '/auth/login',
+        { password, username: 'admin' },
+        {
+          adapter: async (config) =>
+            rejectResponse(
+              config,
+              { code: 401, message: 'invalid password', status: false },
+              401,
+              'Unauthorized',
+            ),
+          headers: { Authorization: 'Bearer local-token-must-not-leak' },
+        },
+      )
+      .catch((requestError) => requestError);
+
+    expect(error).toMatchObject({
+      config: { method: 'post', url: '/auth/login' },
+      response: {
+        config: { method: 'post', url: '/auth/login' },
+        status: 401,
+      },
+    });
+    expect(error.config).not.toHaveProperty('data');
+    expect(error.config).not.toHaveProperty('headers');
+    expect(error.response.config).not.toHaveProperty('data');
+    expect(error.response.config).not.toHaveProperty('headers');
+    expect(JSON.stringify(error)).not.toContain(password);
+    expect(JSON.stringify(error)).not.toContain('local-token-must-not-leak');
+  });
+
   it('surfaces local interceptor errors through the app message handler', async () => {
     const client = createRequestClient('', { responseReturn: 'data' });
     const localError = new Error('Local config failed');

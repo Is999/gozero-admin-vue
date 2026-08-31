@@ -157,6 +157,14 @@ function setupAccessGuard(router: Router) {
       if (error instanceof Error && error.message === SESSION_STATE_CHANGED) {
         return false;
       }
+      // 401 拦截器已经清理旧会话并发起登录页跳转时，中止当前导航，避免把含请求上下文的已处理异常交给 Vue Router。
+      if (
+        !accessStore.accessToken ||
+        sourceToken !== String(accessStore.accessToken || '') ||
+        sourceSessionVersion !== currentSessionStateVersion()
+      ) {
+        return false;
+      }
       throw error;
     }
     // 获取当前登录账号的角色名称、角色 ID与权限码。
