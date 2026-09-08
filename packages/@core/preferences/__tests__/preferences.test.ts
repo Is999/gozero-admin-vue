@@ -99,6 +99,47 @@ describe('preferences', () => {
     expect(preferenceManager.getPreferences()).toEqual(expected);
   });
 
+  it.each(['light', 'dark', 'auto'] as const)(
+    'restores cached %s mode without overwriting it with defaults',
+    async (mode) => {
+      // 模拟刷新前已保存的偏好，同时检查同一对象内的项目约束与用户选择。
+      vi.mocked(localStorage.getItem).mockImplementation((key) =>
+        key === 'theme-restore-preferences'
+          ? JSON.stringify({
+              value: {
+                app: { enableRefreshToken: false, locale: 'en-US' },
+                theme: { mode },
+              },
+            })
+          : null,
+      );
+
+      await preferenceManager.initPreferences({
+        namespace: 'theme-restore',
+        overrides: { app: { enableRefreshToken: true } },
+      });
+
+      const preferences = preferenceManager.getPreferences();
+      expect(preferences.theme.mode).toBe(mode);
+      expect(preferences.theme.radius).toBe(defaultPreferences.theme.radius);
+      expect(preferences.app.locale).toBe('en-US');
+      expect(preferences.app.enableRefreshToken).toBe(true);
+
+      // 启动回写不能再次把已恢复的主题改成默认值。
+      const saved = vi
+        .mocked(localStorage.setItem)
+        .mock.calls.find(([key]) => key === 'theme-restore-preferences');
+      expect(saved).toBeDefined();
+      expect(JSON.parse(saved![1]).value.theme.mode).toBe(mode);
+
+      // 重置仍回到项目初始配置，不把用户缓存当成重置基线。
+      await preferenceManager.resetPreferences();
+      expect(preferenceManager.getPreferences().theme.mode).toBe(
+        defaultPreferences.theme.mode,
+      );
+    },
+  );
+
   it('updates theme mode correctly', () => {
     preferenceManager.updatePreferences({
       theme: {

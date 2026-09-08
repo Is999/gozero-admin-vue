@@ -49,6 +49,10 @@ export function useFormSchema(
       fieldName: 'uuid',
       label: $t('business.message.configUuid'),
       rules: 'required',
+      componentProps: {
+        maxlength: 100,
+        showCount: true,
+      },
     },
     {
       component: 'Input',

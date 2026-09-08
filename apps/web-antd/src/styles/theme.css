@@ -1,0 +1,78 @@
+/* 应用层只覆盖中性色，主色、语义状态色及主题切换仍由 Vben 偏好设置维护。 */
+:root:not(.dark),
+:root .light {
+  /* 淡薄荷绿底色降低大面积纯白感，卡片和浮层逐级提亮。 */
+  --background: 150 16% 98%;
+  --background-deep: 150 14% 95%;
+  --card: 150 18% 99%;
+  --popover: 150 18% 99%;
+  --foreground: 155 15% 22%;
+  --card-foreground: var(--foreground);
+  --popover-foreground: var(--foreground);
+
+  /* 表头、悬停和禁用区域共用层次，保持表格与原生组件一致。 */
+  --muted: 150 12% 94%;
+  --muted-foreground: 155 10% 44%;
+  --secondary: 150 13% 95%;
+  --secondary-foreground: var(--foreground);
+  --accent: 150 13% 94%;
+  --accent-dark: 150 12% 91%;
+  --accent-darker: 150 11% 88%;
+  --accent-lighter: 150 15% 97%;
+  --accent-hover: 150 14% 92%;
+  --accent-foreground: var(--foreground);
+  --heavy: 150 10% 84%;
+  --heavy-foreground: var(--foreground);
+
+  /* 输入区与分隔线保留足够边界，不靠纯白区分可编辑状态。 */
+  --border: 150 9% 84%;
+  --input: var(--border);
+  --input-background: var(--card);
+  --input-placeholder: 155 9% 49%;
+  --overlay-content: 150 16% 98% / 65%;
+
+  /* 显式浅色侧栏和顶栏也使用同一套底色。 */
+  --sidebar: 150 15% 97%;
+  --sidebar-deep: 150 13% 95%;
+  --header: 150 16% 98%;
+  --menu: var(--sidebar);
+}
+
+:root.dark,
+:root .dark {
+  /* 灰蓝底色代替近黑色，内容卡片比工作区亮一级。 */
+  --background: 218 16% 20%;
+  --background-deep: 218 18% 16%;
+  --card: 218 15% 22%;
+  --popover: 218 15% 25%;
+  --foreground: 216 20% 90%;
+  --card-foreground: var(--foreground);
+  --popover-foreground: var(--foreground);
+
+  /* 提亮表头、悬停和次要文字，保留深色模式的阅读层次。 */
+  --muted: 218 14% 26%;
+  --muted-foreground: 216 13% 70%;
+  --secondary: 218 14% 27%;
+  --secondary-foreground: var(--foreground);
+  --accent: 218 15% 28%;
+  --accent-dark: 218 15% 25%;
+  --accent-darker: 218 16% 23%;
+  --accent-lighter: 218 14% 30%;
+  --accent-hover: 218 17% 32%;
+  --accent-foreground: var(--foreground);
+  --heavy: 218 14% 36%;
+  --heavy-foreground: var(--foreground);
+
+  /* 输入框和分隔线随底色提亮，加载遮罩仍明确阻隔操作。 */
+  --border: 218 14% 34%;
+  --input: var(--border);
+  --input-background: 218 16% 21%;
+  --input-placeholder: 216 12% 64%;
+  --overlay-content: 218 18% 16% / 65%;
+
+  /* 局部深色侧栏沿用本色板，避免浅色页面中仍出现纯黑导航。 */
+  --sidebar: 218 17% 19%;
+  --sidebar-deep: 218 18% 17%;
+  --header: 218 16% 21%;
+  --menu: var(--sidebar);
+}

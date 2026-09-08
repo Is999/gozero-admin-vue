@@ -38,7 +38,7 @@ export namespace SystemConfigApi {
 
   // SaveParams 表示新增或编辑字典配置参数。
   export interface SaveParams {
-    uuid?: string; // 配置UUID
+    uuid?: string; // 配置UUID，最多100个字符
     title?: string; // 配置标题
     type?: number; // 配置类型
     value?: any; // 配置值

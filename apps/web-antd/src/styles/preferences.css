@@ -1,3 +1,5 @@
+@import './theme.css';
+
 /* 偏好抽屉标题与说明纵向排列，英文说明可换行且不会挤压右侧操作按钮。 */
 [role='dialog'][class~='border-0!'][class~='sm:max-w-sm']
   > :first-child

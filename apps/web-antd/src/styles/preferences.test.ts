@@ -3,9 +3,16 @@ import { resolve } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+// Happy DOM 不加载相对路径的样式导入，测试中展开主题文件以保留完整样式。
 const preferencesCss = readFileSync(
   resolve(process.cwd(), 'apps/web-antd/src/styles/preferences.css'),
   'utf8',
+).replace(
+  "@import './theme.css';",
+  readFileSync(
+    resolve(process.cwd(), 'apps/web-antd/src/styles/theme.css'),
+    'utf8',
+  ),
 );
 
 function createTabs(preferencesDrawer = true) {
