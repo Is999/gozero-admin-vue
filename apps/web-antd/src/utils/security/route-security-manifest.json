@@ -1173,9 +1173,9 @@
         "signatureType",
         "payloadText",
         "signText",
-        "sign"
+        "debugSign"
       ],
-      "responseCipher": ["payloadText", "signText", "sign"]
+      "responseCipher": ["payloadText", "signText", "debugSign"]
     },
     {
       "alias": "security.debug.verify",
@@ -1193,10 +1193,10 @@
         "signatureType",
         "payloadText",
         "signText",
-        "sign",
+        "debugSign",
         "verified"
       ],
-      "responseCipher": ["payloadText", "signText", "sign"]
+      "responseCipher": ["payloadText", "signText", "debugSign"]
     },
     {
       "alias": "security.debug.encrypt",

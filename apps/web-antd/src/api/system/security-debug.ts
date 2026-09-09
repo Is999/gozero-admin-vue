@@ -29,7 +29,7 @@ export namespace SystemSecurityDebugApi {
     requestId?: string; // 后端返回的请求标识
     traceId: string; // 实际参与签名的追踪标识，对应 X-Trace-Id
     timestamp: string; // 实际参与签名的秒级时间戳，对应 X-Timestamp
-    sign: string; // 生成的签名值
+    debugSign: string; // 调试生成的签名，与响应传输层的 sign 分开保存
     signFields: string[]; // 实际参与签名的字段
     signText: string; // 最终签名串
     signatureType: 'A' | 'R'; // 实际签名方式

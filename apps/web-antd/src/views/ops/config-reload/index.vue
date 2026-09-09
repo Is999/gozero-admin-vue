@@ -2065,7 +2065,7 @@ watch(
               v-if="activeConfigItemViewMode === 'yaml'"
               ref="configYamlViewRef"
               :aria-label="$t('business.message.yamlView')"
-              class="config-yaml-view mt-4 max-h-[640px] overflow-auto border border-slate-200 bg-slate-950 font-mono text-[13px] leading-5 shadow-inner dark:border-slate-700"
+              class="config-yaml-view mt-4 max-h-[640px] overflow-auto border border-border bg-card font-mono text-[13px] leading-5 shadow-inner dark:border-slate-700 dark:bg-slate-950"
               role="region"
             >
               <div
@@ -2082,7 +2082,7 @@ watch(
                   }"
                 >
                   <span
-                    class="config-yaml-line-no sticky left-0 select-none border-r border-slate-800 bg-slate-950 px-3 text-right text-slate-500"
+                    class="config-yaml-line-no sticky left-0 select-none border-r border-border bg-card px-3 text-right text-muted-foreground dark:border-slate-800 dark:bg-slate-950 dark:text-slate-500"
                   >
                     {{ line.no }}
                   </span>
@@ -2125,7 +2125,7 @@ watch(
                   </code>
                 </div>
               </div>
-              <div v-else class="px-4 py-4 text-slate-400">-</div>
+              <div v-else class="px-4 py-4 text-muted-foreground">-</div>
             </div>
 
             <Table
@@ -2315,7 +2315,12 @@ watch(
   }
 }
 
+/* 浅色语法色使用深色阶保证白底可读，暗色主题沿用原有代码配色。 */
 .config-yaml-view {
+  color: hsl(var(--foreground));
+}
+
+:is(.dark .config-yaml-view) {
   color: #dbeafe;
 }
 
@@ -2324,10 +2329,18 @@ watch(
 }
 
 .config-yaml-line:hover {
+  background: hsl(var(--primary) / 6%);
+}
+
+:is(.dark .config-yaml-line:hover) {
   background: rgb(30 64 175 / 16%);
 }
 
 .config-yaml-line-current {
+  background: hsl(var(--primary) / 12%);
+}
+
+:is(.dark .config-yaml-line-current) {
   background: rgb(30 64 175 / 28%);
 }
 
@@ -2362,41 +2375,52 @@ watch(
   color: rgb(96 165 250);
 }
 
-.config-yaml-match {
-  padding: 0 2px;
-  color: #fef3c7;
-  background: rgb(180 83 9 / 55%);
-  border-radius: 3px;
-}
-
-.config-yaml-match-current {
-  color: #111827;
-  background: #fde047;
-  box-shadow: 0 0 0 1px rgb(253 224 71 / 60%);
-}
-
 .config-yaml-token-key {
   font-weight: 600;
+  color: #0369a1;
+}
+
+:is(.dark .config-yaml-token-key) {
   color: #7dd3fc;
 }
 
 .config-yaml-token-punctuation {
+  color: #64748b;
+}
+
+:is(.dark .config-yaml-token-punctuation) {
   color: #94a3b8;
 }
 
 .config-yaml-token-string {
+  color: #047857;
+}
+
+:is(.dark .config-yaml-token-string) {
   color: #a7f3d0;
 }
 
 .config-yaml-token-number {
+  color: #b45309;
+}
+
+:is(.dark .config-yaml-token-number) {
   color: #fbbf24;
 }
 
 .config-yaml-token-boolean {
+  color: #6d28d9;
+}
+
+:is(.dark .config-yaml-token-boolean) {
   color: #c4b5fd;
 }
 
 .config-yaml-token-null {
+  color: #b91c1c;
+}
+
+:is(.dark .config-yaml-token-null) {
   color: #fca5a5;
 }
 
@@ -2406,6 +2430,30 @@ watch(
 }
 
 .config-yaml-token-plain {
+  color: #334155;
+}
+
+:is(.dark .config-yaml-token-plain) {
   color: #cbd5e1;
+}
+
+/* 搜索命中覆盖语法颜色，避免不同 token 在同一高亮底色上对比度不一致。 */
+.config-yaml-view .config-yaml-match {
+  padding: 0 2px;
+  color: #92400e;
+  background: #fef3c7;
+  border-radius: 3px;
+}
+
+:is(.dark .config-yaml-view) .config-yaml-match {
+  color: #fef3c7;
+  background: rgb(180 83 9 / 55%);
+}
+
+.config-yaml-view .config-yaml-match-current,
+:is(.dark .config-yaml-view) .config-yaml-match-current {
+  color: #111827;
+  background: #fde047;
+  box-shadow: 0 0 0 1px rgb(253 224 71 / 60%);
 }
 </style>

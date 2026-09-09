@@ -1133,22 +1133,27 @@ onMounted(() => {
 <template>
   <Page :title="$t('business.message.taskConsole')">
     <div class="grid gap-2">
+      <!-- 浅色卡片沿用主题色与正文对比度，深色外观仅在暗色主题启用。 -->
       <section
-        class="overflow-hidden rounded-2xl border border-cyan-500/20 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.16),_transparent_34%),linear-gradient(135deg,_rgba(15,23,42,0.98),_rgba(15,23,42,0.9))] px-5 py-4 text-slate-100 shadow-[0_16px_44px_rgba(15,23,42,0.3)]"
+        class="overflow-hidden rounded-2xl border border-border bg-card bg-[radial-gradient(circle_at_top_left,_hsl(var(--primary)/0.08),_transparent_55%)] dark:border-cyan-500/20 dark:bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.16),_transparent_34%),linear-gradient(135deg,_rgba(15,23,42,0.98),_rgba(15,23,42,0.9))] px-5 py-4 text-foreground shadow-sm dark:text-slate-100 dark:shadow-[0_16px_44px_rgba(15,23,42,0.3)]"
       >
         <div
           class="grid gap-4 xl:grid-cols-[minmax(320px,0.78fr)_minmax(0,1.22fr)] xl:items-start"
         >
           <div>
             <div
-              class="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300/80"
+              class="text-xs font-semibold uppercase tracking-[0.28em] text-primary dark:text-cyan-300/80"
             >
               {{ $t('business.message.taskConsoleEyebrow') }}
             </div>
-            <div class="mt-2 text-2xl font-semibold tracking-tight text-white">
+            <div
+              class="mt-2 text-2xl font-semibold tracking-tight text-foreground dark:text-white"
+            >
               {{ $t('business.message.taskConsoleTitle') }}
             </div>
-            <div class="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
+            <div
+              class="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground dark:text-slate-300"
+            >
               {{ $t('business.message.taskConsoleDesc') }}
             </div>
           </div>
@@ -1156,21 +1161,21 @@ onMounted(() => {
             <div
               v-for="item in taskConsoleOverviewCards"
               :key="item.label"
-              class="rounded-xl border border-white/10 bg-white/5 px-3 py-3 backdrop-blur"
+              class="rounded-xl border border-border bg-background/70 dark:border-white/10 dark:bg-white/5 px-3 py-3 backdrop-blur"
             >
               <div
-                class="truncate text-[11px] uppercase tracking-[0.18em] text-slate-400"
+                class="truncate text-[11px] uppercase tracking-[0.18em] text-muted-foreground dark:text-slate-400"
               >
                 {{ item.label }}
               </div>
               <div
-                class="mt-1 truncate text-lg font-semibold text-white"
+                class="mt-1 truncate text-lg font-semibold text-foreground dark:text-white"
                 :title="String(item.value || '-')"
               >
                 {{ item.value }}
               </div>
               <div
-                class="mt-1 line-clamp-1 text-[11px] leading-4 text-slate-400"
+                class="mt-1 line-clamp-1 text-[11px] leading-4 text-muted-foreground dark:text-slate-400"
                 :title="String(item.description || '-')"
               >
                 {{ item.description }}

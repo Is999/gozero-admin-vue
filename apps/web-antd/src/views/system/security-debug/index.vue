@@ -538,7 +538,7 @@ async function signRequestLocally(): Promise<SystemSecurityDebugApi.SignResult> 
     requestId: currentTraceId,
     traceId: currentTraceId,
     timestamp: currentTimestamp,
-    sign,
+    debugSign: sign,
     signFields: effectiveSignFields.value,
     signText,
     signatureType: signatureType.value,
@@ -574,7 +574,7 @@ async function verifyResponseLocally(): Promise<SystemSecurityDebugApi.VerifyRes
     requestId: currentTraceId,
     traceId: currentTraceId,
     timestamp: currentTimestamp,
-    sign: currentSign,
+    debugSign: currentSign,
     signFields: effectiveSignFields.value,
     signText,
     signatureType: signatureType.value,
@@ -603,7 +603,7 @@ async function handleSign() {
     traceId.value = resolveResultTraceId(signResult.value) || traceId.value;
     signatureTimestamp.value =
       resolveResultTimestamp(signResult.value) || signatureTimestamp.value;
-    signValue.value = signResult.value?.sign || '';
+    signValue.value = signResult.value?.debugSign || '';
     message.success(
       $t('business.message.signDebugCompleted', [currentFlowTitle.value]),
     );
@@ -1201,7 +1201,8 @@ function clearInputs() {
 
 // injectSignIntoPayload 把当前 sign 值写回 payload，便于继续做字段级加密模拟。
 function injectSignIntoPayload() {
-  const currentSign = signValue.value.trim() || signResult.value?.sign || '';
+  const currentSign =
+    signValue.value.trim() || signResult.value?.debugSign || '';
   if (!currentSign) {
     message.warning($t('business.message.signValueUnavailable'));
     return;
@@ -1260,7 +1261,7 @@ function fillVerifyFromSign() {
   payloadText.value = signResult.value.payloadText;
   traceId.value = resolveResultTraceId(signResult.value);
   signatureTimestamp.value = resolveResultTimestamp(signResult.value);
-  signValue.value = signResult.value.sign;
+  signValue.value = signResult.value.debugSign;
   signFieldsText.value = signResult.value.signFields.join(',');
 }
 
